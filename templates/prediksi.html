@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+   <meta name="viewport" content="initial-scale=1.0">
+   <title>Twitter Sentiment Analysis</title>
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+   <link rel="stylesheet" href="./assets/fa-icon/css/font-awesome.min.css">
+   <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+    <div class="page">
+        <div class="sidebar" id="sidebar">
+           <div class="position-relative">
+              <div class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
+                 <i class="fa fa-chevron-right" aria-hidden="true"></i>
+              </div>
+              <a class="side-item" href="/templates/index.html">Sentimen Analysis</a>
+              <a class="side-item active" href="/templates/word-clouds.html">Word Clouds</a>
+              <a class="side-item" href="/templates/word-data.html">Depression Trends</a>
+              <a class="side-item" href="/templates/prediksi.html">Prediksi</a>
+           </div>
+        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+     </script>
+     <script src="./js/index.js"></script>
+
+    <h1>Twitter Sentiment Analysis</h1>
+    <form action="/" method="POST">
+        <label for="tweet">Masukkan tweet:</label><br>
+        <input type="text" id="tweet" name="tweet"><br><br>
+        <input type="submit" value="Analyze">
+    </form>
+
+</body>
+</html>

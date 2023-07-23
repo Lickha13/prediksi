@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="initial-scale=1.0">
+   <title>Document</title>
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+   <link rel="stylesheet" href="./assets/fa-icon/css/font-awesome.min.css">
+   <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+   <div class="page">
+      <div class="sidebar" id="sidebar">
+         <div class="position-relative">
+            <div class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
+               <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </div>
+            <a class="side-item" href="/templates/index.html">Sentimen Analysis</a>
+            <a class="side-item active" href="/templates/word-clouds.html">Word Clouds</a>
+            <a class="side-item" href="/templates/word-data.html">Depression Trends</a>
+            <a class="side-item" href="/templateschart-word/prediksi.html">Prediksi</a>
+         </div>
+      </div>
+      <div class="container-page">
+         <div class="container">
+            <section>
+               <div class="row">
+                  <div class="col-12 col-md-8 col-lg-4">
+                     <select class="form-select" aria-label="word cloud" id="select-word">
+                        <option disabled selected>Please Choose Word Clouds</option>
+                        <option value="img_positif">Word Clouds Positive Polarity</option>
+                        <option value="img_netral">Word Clouds Netral Polarity</option>
+                        <option value="img_negatif">Word Clouds Negative Polarity</option>
+                     </select>
+                  </div>
+               </div>
+               <div class="word-img mt-3" id="img-word">
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+   </script>
+   <script src="./js/index.js"></script>
+
+   <script>
+      const data_image = {
+         img_positif: './assets/image/wordcloud_positif.png',
+         img_netral: './assets/image/wordcloud_netral.png',
+         img_negatif: './assets/image/wordcloud_negatif.png'
+      }
+      document.getElementById('select-word').addEventListener("change", onChange);
+
+      function onChange(e) {
+         innerHtml('img-word', `
+            <img src="${data_image[e.target.value]}" alt="image word clouds">
+         `)
+      }
+   </script>
+</body>
+
+</html>

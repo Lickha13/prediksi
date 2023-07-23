@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="initial-scale=1.0">
+   <title>Document</title>
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+   <link rel="stylesheet" href="./assets/fa-icon/css/font-awesome.min.css">
+   <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+   <div class="page">
+      <div class="sidebar" id="sidebar">
+         <div class="position-relative">
+            <div class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
+               <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </div>
+            <a class="side-item" href="/templates/index.html">Sentimen Analysis</a>
+            <a class="side-item" href="/templates/word-clouds.html">Word Clouds</a>
+            <a class="side-item active" href="/templates/word-data.html">Depression Trends</a>
+            <a class="side-item" href="/templates/prediksi.html">Prediksi</a>
+         </div>
+      </div>
+      <div class="container-page">
+         <div class="container">
+            <section>
+               <h3 class="mb-4">Daftar kata yang ramai diperbincangkan terkait ganguan depresi:</h3>
+               <div class="d-flex align-items-center gap-3">
+                  <p>Filter:</p>
+                  <select class="form-select" style="max-width: 180px;" aria-label="word cloud" id="select-date">
+                     <option value="all" selected>Semua Tanggal</option>
+                  </select>
+               </div>
+               <div class="word-img">
+                  <div>
+                     <canvas id="bar-chart"></canvas>
+                  </div>
+               </div>
+            </section>
+         </div>
+      </div>
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+   </script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+   <script src="./data/data_stemmingnew.js"></script>
+   <script src="./js/index.js"></script>
+   <script src="./assets/moment/moment.js"></script>
+
+   <script>
+      // distribute data
+      const DATA_INIT = DATA_STEMMINGNEW.sort((a, b) => {
+         return new Date(a.created_at) - new Date(b.created_at)
+      });
+
+      let key_word = [];
+      let group_word = [];
+      let date_list = [];
+
+      if (DATA_INIT.length > 0) DATA_INIT.forEach(item => {
+         let temp_keyword = item.stemming.split(" ")
+
+         // group by word
+         if (temp_keyword && temp_keyword.length > 0) temp_keyword.forEach(word => {
+            let index_word = key_word.indexOf(word);
+
+            if (index_word < 0) {
+               key_word.push(word)
+               group_word.push({
+                  label: word,
+                  data: [item]
+               })
+            } else {
+               group_word[index_word].data.push(item)
+            }
+         });
+
+         // get list filter date
+         let date = moment(item.created_at).format("DD MMMM YYYY");
+         let index_date = date_list.indexOf(date);
+         if (index_date < 0) {
+            date_list.push(date)
+         }
+      })
+
+      // init chart
+      let data_label = group_word.sort((a, b) => {
+         return b.data.length - a.data.length
+      }).filter((_, index) => index < 10).map(item => item.label)
+      let data_length = group_word.sort((a, b) => {
+         return b.data.length - a.data.length
+      }).filter((_, index) => index < 10).map(item => item.data.length)
+
+      var barElm = document.getElementById("bar-chart");
+      var barChart = new Chart(barElm, {
+         type: 'bar',
+         data: {
+            labels: data_label,
+            datasets: [{
+               label: 'Jumlah',
+               data: data_length,
+               backgroundColor: "#205ab3"
+            }],
+         },
+         options: {
+            responsive: true,
+         }
+      });
+
+      // update chart
+      function updateChart(data_temp) {
+         let key_word = [];
+         let group_word = [];
+
+         if (data_temp.length > 0) data_temp.forEach(item => {
+            let temp_keyword = item.stemming.split(" ")
+
+            // group by word
+            if (temp_keyword && temp_keyword.length > 0) temp_keyword.forEach(word => {
+               let index_word = key_word.indexOf(word);
+
+               if (index_word < 0) {
+                  key_word.push(word)
+                  group_word.push({
+                     label: word,
+                     data: [item]
+                  })
+               } else {
+                  group_word[index_word].data.push(item)
+               }
+            });
+         })
+
+         // data distribution
+         let data_label = group_word.sort((a, b) => {
+            return b.data.length - a.data.length
+         }).filter((_, index) => index < 10).map(item => item.label)
+         let data_length = group_word.sort((a, b) => {
+            return b.data.length - a.data.length
+         }).filter((_, index) => index < 10).map(item => item.data.length)
+
+         barChart.data = {
+            labels: data_label,
+            datasets: [{
+               label: 'Jumlah',
+               data: data_length,
+               backgroundColor: "#205ab3"
+            }],
+            options: {
+               responsive: true,
+            }
+         }
+
+         barChart.update();
+      }
+
+      // init filter
+      if (date_list.length > 0) date_list.forEach(item => {
+         appendHtml('select-date', `<option value="${item}">${item}</option>`)
+      })
+      document.getElementById('select-date').addEventListener("change", filter);
+
+      function filter(e) {
+         let value = e.target.value
+         let data_temp = value === 'all' ? DATA_INIT : DATA_INIT.filter(item => moment(item.created_at).format(
+            "DD MMMM YYYY") === value)
+
+         console.log(data_temp)
+         updateChart(data_temp)
+      }
+   </script>
+</body>
+
+</html>

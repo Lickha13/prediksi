@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="initial-scale=1.0">
+   <title>Document</title>
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+   <link rel="stylesheet" href="./assets/fa-icon/css/font-awesome.min.css">
+   <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+   <div class="page">
+      <div class="sidebar" id="sidebar">
+         <div class="position-relative">
+            <div class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
+               <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </div>
+            <a class="side-item active" href="/templates/index.html">Sentimen Analysis</a>
+            <a class="side-item" href="/templates/word-clouds.html">Word Clouds</a>
+            <a class="side-item" href="/templates/word-data.html">Depression Trends</a>
+            <a class="side-item" href="/templates/prediksi.html">Prediksi</a>
+         </div>
+      </div>
+      <div class="container-page" id="page">
+         <div class="container">
+            <div class="row flex-column-reverse flex-lg-row">
+               <div class="col-lg-7 col-12">
+                  <section class="mb-5">
+                     <h4>Sentimen</h4>
+                     <canvas id="line-chart"></canvas>
+                  </section>
+
+                  <div class="card-list">
+                     <div id="card-list"></div>
+                     <section class="d-flex align-items-center justify-content-between mb-5" id="pagination">
+
+                     </section>
+                  </div>
+               </div>
+               <div class="col-lg-5 col-12">
+                  <section class="mb-5">
+                     <div class="mb-5">
+                        <h5>Sentimen</h5>
+                        <div class="filter-data d-flex align-items-center gap-4">
+                           <div class="form-check">
+                              <input class="form-check-input positif" checked type="checkbox" id="positif-checkbox"
+                                 onchange="filter()">
+                              <label class="form-check-label" for="positif-checkbox">
+                                 Positif
+                              </label>
+                           </div>
+                           <div class="form-check">
+                              <input class="form-check-input netral" checked type="checkbox" id="netral-checkbox"
+                                 onchange="filter()">
+                              <label class="form-check-label" for="netral-checkbox">
+                                 Netral
+                              </label>
+                           </div>
+                           <div class="form-check">
+                              <input class="form-check-input negatif" checked type="checkbox" id="negatif-checkbox"
+                                 onchange="filter()">
+                              <label class="form-check-label" for="negatif-checkbox">
+                                 Negatif
+                              </label>
+                           </div>
+                        </div>
+                     </div>
+                     <div>
+                        <h3 class='fw-light text-center'>Sentimen</h3>
+                        <div id="pie-wrapper">
+                           <canvas id="pie-chart"></canvas>
+                        </div>
+                        <div id="bar-wrapper" class="mt-5">
+                           <canvas id="bar-chart"></canvas>
+                        </div>
+                     </div>
+                  </section>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+   </script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+   <script src="./data/data.js"></script>
+   <script src="./js/index.js"></script>
+   <script src="./assets/moment/moment.js"></script>
+
+   <!-- JS -->
+   <script>
+      const DATA_INIT = DATA.filter(item => !!item.label).sort((a, b) => {
+         return new Date(b.created_at) - new Date(a.created_at)
+      });
+
+      const data_positif = DATA_INIT.filter(item => item.label === 'positif');
+      const data_netral = DATA_INIT.filter(item => item.label === 'netral');
+      const data_negatif = DATA_INIT.filter(item => item.label === 'negatif');
+
+      const QUERY_SEARCH = new URLSearchParams(window.location.search);
+      const PAGE = QUERY_SEARCH.get('page') ? parseInt(QUERY_SEARCH.get('page')) : 1;
+      const PER_PAGE = (QUERY_SEARCH.get('per_page') ? parseInt(QUERY_SEARCH.get('per_page')) : 10);
+      const TOTAL_PAGE = Math.trunc(DATA_INIT.length / PER_PAGE)
+
+      if (QUERY_SEARCH.get('positif') == 'false') document.getElementById('positif-checkbox').checked = false
+      if (QUERY_SEARCH.get('netral') == 'false') document.getElementById('netral-checkbox').checked = false
+      if (QUERY_SEARCH.get('negatif') == 'false') document.getElementById('negatif-checkbox').checked = false
+
+      function renderCard(data = null, filter_by = null) {
+         let data_card = data ? data : DATA_INIT
+         let total_page = data ? Math.trunc(data.length / PER_PAGE) : Math.trunc(DATA_INIT.length / PER_PAGE)
+
+         // set filter query
+         let queryString = filter_by ? new URLSearchParams(filter_by).toString() : '';
+
+         // reset card
+         if (data) innerHtml('card-list', '')
+
+         for (let index = PAGE * PER_PAGE; index < (PER_PAGE * PAGE) + PER_PAGE; index++) {
+            if (data_card[index]) {
+               let tempAppend = `
+                  <section class="mb-4">
+                     <div class="d-flex align-items-center position-relative mb-3" style="gap: 16px;">
+                        <div class="avatar">
+                           <i class="fa fa-user" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                           <p class="fw-bold">${data_card[index].username}</p>
+                           <div class="d-flex align-items-center" style="gap: 12px; opacity: .4;">
+                              <small>twitter.com</small>
+                              <small>${moment(data_card[index].created_at).format("DD MMMM YYYY")}</small>
+                           </div>
+                        </div>
+                        <div class="label-badge ${data_card[index].label}">
+                           ${data_card[index].label}
+                        </div>
+                     </div>
+                     <p>${detectSpecialWord(data_card[index].full_text, 'depresi')}</p>
+                     <div class="d-flex align-items-center mt-3" style="gap: 16px;">
+                        <small class="social-action">
+                           <i class="fa fa-comment" aria-hidden="true"></i>
+                           Comment
+                        </small>
+                        <small class="social-action">
+                           <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                           Like
+                        </small>
+                        <small class="social-action">
+                           <i class="fa fa-share" aria-hidden="true"></i>
+                           Share
+                        </small>
+                     </div>
+                  </section>
+               `
+               appendHtml('card-list', data_card[index].url ? `
+                  <a class="has-url" href="${data_card[index].url}">${tempAppend}</a>
+               ` : tempAppend)
+            }
+
+         }
+
+         innerHtml('pagination', `
+            ${PAGE !== 1 ? `
+               <a href="${window.location.pathname}?page=${PAGE - 1}${QUERY_SEARCH.get('per_page') ? `&per_page=${PER_PAGE}` : ''}${queryString ? `&${queryString}` : ''}" onclick="">
+                  <i class="fa fa-chevron-left" aria-hidden="true"></i> Prev
+               </a>
+            ` : '<div></div>'}
+            
+            <div class="d-flex align-items-center" style="gap: 10px;">
+               <input type="number" value="${PAGE}" min="1" max="${total_page}" onchange="onChangePagination(this)">
+               <p>/ ${total_page}</p>
+            </div>
+
+            ${PAGE !== total_page ? `
+               <a href="${window.location.pathname}?page=${PAGE + 1}${QUERY_SEARCH.get('per_page') ? `&per_page=${PER_PAGE}` : ''}${queryString ? `&${queryString}` : ''}" onclick="">
+                  Next <i class="fa fa-chevron-right" aria-hidden="true"></i>
+               </a>
+            ` : '<div></div>'}
+         `)
+      }
+
+      function onChangePagination(e) {
+         let value = e.value;
+         window.location.href =
+            `${window.location.pathname}?page=${value <= TOTAL_PAGE ? value : TOTAL_PAGE}${PER_PAGE ? `&per_page=${PER_PAGE}` : ''}`
+      }
+
+      renderCard()
+
+      // chart
+      var pieElm = document.getElementById("pie-chart");
+      var lineElm = document.getElementById("line-chart");
+      var barElm = document.getElementById("bar-chart");
+
+      let key_date = [];
+      let group_date = [];
+      DATA_INIT.forEach(item => {
+         let date = moment(item.created_at).format("DD MMM YYYY");
+         let index = key_date.indexOf(date);
+
+         if (index < 0) {
+            let tempData = {
+               positif: [],
+               netral: [],
+               negatif: [],
+            }
+            let tempCount = {
+               positif: 0,
+               netral: 0,
+               negatif: 0,
+            }
+            tempData[item.label].push(item);
+            tempCount[item.label] += 1
+
+            group_date.push({
+               label: date,
+               data: tempData,
+               total: tempCount
+            })
+            key_date.push(date)
+         } else {
+            group_date[index].data[item.label].push(item)
+            group_date[index].total[item.label] += 1
+         }
+      })
+      var lineChart = new Chart(lineElm, {
+         type: 'line',
+         data: {
+            labels: key_date,
+            datasets: [{
+               label: 'Positif',
+               data: group_date.map(item => {
+                  return item.total['positif']
+               }),
+               backgroundColor: "#32bf6a",
+               borderColor: "#32bf6a",
+            }, {
+               label: 'Netral',
+               data: group_date.map(item => {
+                  return item.total['netral']
+               }),
+               backgroundColor: "#9b9b9b",
+               borderColor: "#9b9b9b",
+            }, {
+               label: 'Negatif',
+               data: group_date.map(item => {
+                  return item.total['negatif']
+               }),
+               backgroundColor: "#a63535",
+               borderColor: "#a63535",
+            }],
+         },
+         options: {
+            responsive: true,
+         }
+      });
+
+      var pieChart = new Chart(pieElm, {
+         type: 'doughnut',
+         data: {
+            labels: [
+               `Positif: ${percentage(data_positif.length, data_positif.length + data_netral.length + data_negatif.length)}%`,
+               `Netral: ${percentage(data_netral.length, data_positif.length + data_netral.length + data_negatif.length)}%`,
+               `Negatif: ${percentage(data_negatif.length, data_positif.length + data_netral.length + data_negatif.length)}%`
+            ],
+
+            datasets: [{
+               label: 'Label',
+               data: [data_positif.length, data_netral.length, data_negatif.length],
+               backgroundColor: ["#32bf6a", '#9b9b9b', '#a63535'],
+            }],
+         },
+         options: {
+            responsive: true,
+            plugins: {
+               legend: {
+                  position: 'bottom',
+               }
+            },
+         }
+      });
+
+      var barChart = new Chart(barElm, {
+         type: 'bar',
+         data: {
+            labels: ["Positif", "Netral", "Negatif"],
+            datasets: [{
+               label: 'Jumlah',
+               data: [data_positif.length, data_netral.length, data_negatif.length],
+            }],
+            backgroundColor: ["#4a81fb"]
+         },
+         options: {
+            responsive: true,
+         }
+      });
+
+      function updateChart(data_temp) {
+         // init Data Chart
+         let data_positif = data_temp.filter(item => item.label === 'positif');
+         let data_netral = data_temp.filter(item => item.label === 'netral');
+         let data_negatif = data_temp.filter(item => item.label === 'negatif');
+
+         // manipulate line chart
+         let key_date = [];
+         let group_date = [];
+         data_temp.forEach(item => {
+            let date = moment(item.created_at).format("DD MMM YYYY");
+            let index = key_date.indexOf(date);
+
+            if (index < 0) {
+               let tempData = {
+                  positif: [],
+                  netral: [],
+                  negatif: [],
+               }
+               let tempCount = {
+                  positif: 0,
+                  netral: 0,
+                  negatif: 0,
+               }
+               tempData[item.label].push(item);
+               tempCount[item.label] += 1
+
+               group_date.push({
+                  label: date,
+                  data: tempData,
+                  total: tempCount
+               })
+               key_date.push(date)
+            } else {
+               group_date[index].data[item.label].push(item)
+               group_date[index].total[item.label] += 1
+            }
+         })
+
+         // data distribution
+         let data_line = []
+         let data_pie_label = []
+         let data_pie_bg = []
+         let data_bar_label = []
+         let data_chart_bar_pie = []
+
+         if (data_positif.length > 0) {
+            data_line.push({
+               label: 'Positif',
+               data: group_date.map(item => {
+                  return item.total['positif']
+               }),
+               backgroundColor: "#32bf6a",
+               borderColor: "#32bf6a",
+            })
+            data_pie_label.push(
+               `Positif: ${percentage(data_positif.length, data_positif.length + data_netral.length + data_negatif.length)}%`
+            )
+            data_pie_bg.push('#32bf6a')
+            data_bar_label.push('Positif')
+            data_chart_bar_pie.push(data_positif.length)
+         }
+         if (data_netral.length > 0) {
+            data_line.push({
+               label: 'Netral',
+               data: group_date.map(item => {
+                  return item.total['netral']
+               }),
+               backgroundColor: "#9b9b9b",
+               borderColor: "#9b9b9b",
+            })
+            data_pie_label.push(
+               `Netral: ${percentage(data_netral.length, data_positif.length + data_netral.length + data_negatif.length)}%`
+            )
+            data_pie_bg.push('#9b9b9b')
+            data_bar_label.push('Netral')
+            data_chart_bar_pie.push(data_netral.length)
+         }
+         if (data_negatif.length > 0) {
+            data_line.push({
+               label: 'Negatif',
+               data: group_date.map(item => {
+                  return item.total['negatif']
+               }),
+               backgroundColor: "#a63535",
+               borderColor: "#a63535",
+            })
+            data_pie_label.push(
+               `Negatif: ${percentage(data_negatif.length, data_positif.length + data_netral.length + data_negatif.length)}%`
+            )
+            data_pie_bg.push('#a63535')
+            data_bar_label.push('Negatif')
+            data_chart_bar_pie.push(data_negatif.length)
+         }
+
+         lineChart.data = {
+            labels: key_date,
+            datasets: data_line,
+         }
+
+         pieChart.data = {
+            labels: data_pie_label,
+
+            datasets: [{
+               label: 'Label',
+               data: data_chart_bar_pie,
+               backgroundColor: data_pie_bg,
+            }],
+         }
+
+         barChart.data = {
+            labels: data_bar_label,
+            datasets: [{
+               label: 'Jumlah',
+               data: data_chart_bar_pie,
+            }],
+            backgroundColor: ["#4a81fb"]
+         }
+
+         lineChart.update();
+         pieChart.update();
+         barChart.update();
+      }
+
+      function filter() {
+         let inputPositif = document.getElementById('positif-checkbox').checked
+         let inputNetral = document.getElementById('netral-checkbox').checked
+         let inputNegatif = document.getElementById('negatif-checkbox').checked
+
+         let data_temp = DATA_INIT.filter(item => item.label && ((item.label == 'positif' && inputPositif) || (item
+            .label ==
+            'netral' && inputNetral) || (item.label == 'negatif' && inputNegatif)))
+
+         renderCard(data_temp, {
+            positif: inputPositif,
+            netral: inputNetral,
+            negatif: inputNegatif
+         })
+         updateChart(data_temp)
+      }
+
+      if (QUERY_SEARCH.get('positif') || QUERY_SEARCH.get('netral') || QUERY_SEARCH.get('negatif')) filter()
+   </script>
+</body>
+
+</html>
