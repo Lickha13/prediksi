@@ -8,8 +8,8 @@
 
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
       integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-   <link rel="stylesheet" href="./assets/fa-icon/css/font-awesome.min.css">
-   <link rel="stylesheet" href="style.css">
+   <link rel="stylesheet" href="{{url_for('static',filename='assets/fa-icon/css/font-awesome.min.css')}}">
+   <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
 </head>
 
 <body>
@@ -19,10 +19,10 @@
             <div class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
                <i class="fa fa-chevron-right" aria-hidden="true"></i>
             </div>
-            <a class="side-item" href="/templates/index.html">Sentimen Analysis</a>
-            <a class="side-item active" href="/templates/word-clouds.html">Word Clouds</a>
-            <a class="side-item" href="/templates/word-data.html">Depression Trends</a>
-            <a class="side-item" href="/templateschart-word/prediksi.html">Prediksi</a>
+            <a class="side-item" href={{url_for('index')}}>Sentimen Analysis</a>
+            <a class="side-item active" href={{url_for('word_clouds')}}>Word Clouds</a>
+            <a class="side-item" href={{url_for('word_data')}}>Depression Trends</a>
+            <a class="side-item" href={{url_for('prediksi')}}>Prediksi</a>
          </div>
       </div>
       <div class="container-page">
@@ -48,13 +48,13 @@
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
    </script>
-   <script src="./js/index.js"></script>
+   <script src="{{url_for('static', filename='js/index.js')}}"></script>
 
    <script>
       const data_image = {
-         img_positif: './assets/image/wordcloud_positif.png',
-         img_netral: './assets/image/wordcloud_netral.png',
-         img_negatif: './assets/image/wordcloud_negatif.png'
+         img_positif: {{url_for('static', filename='assets/image/wordcloud_positif.png')}},
+         img_netral: {{url_for('static', filename='assets/image/wordcloud_netral.png')}},
+         img_negatif: {{url_for('static', filename='assets/image/wordcloud_negatir.png')}}
       }
       document.getElementById('select-word').addEventListener("change", onChange);
 
