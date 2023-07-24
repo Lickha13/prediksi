@@ -51,11 +51,16 @@ def word_clouds():
 def word_data():
     return render_template('word-data.html')
 
+def predict_sentiment(tweet):
+    input_vector = vectorizer.transform([tweet])
+    prediction = model.predict(input_vector)[0]
+    return prediction
+
 @app.route('/prediksi', methods=['GET', 'POST'])
 def prediksi():
     if request.method == 'POST':
         tweet = request.form['tweet']
-        prediction = prediksi(tweet)
+        prediction = predict_sentiment(tweet)  # Ganti 'prediksi' menjadi 'predict_sentiment'
         return render_template('prediksi_result.html', tweet=tweet, prediction=prediction)
     return render_template('prediksi.html')
 
