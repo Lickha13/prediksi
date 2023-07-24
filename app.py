@@ -52,10 +52,10 @@ def word_data():
     return render_template('word-data.html')
 
 @app.route('/prediksi', methods=['GET', 'POST'])
-def predict():
+def prediksi():
     if request.method == 'POST':
         tweet = request.form['tweet']
-        prediction = predict_sentiment(tweet)
+        prediction = prediksi(tweet)
         return render_template('prediksi_result.html', tweet=tweet, prediction=prediction)
     return render_template('prediksi.html')
 
