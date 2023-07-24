@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+   <meta name="viewport" content="initial-scale=1.0">
+   <title>Twitter Sentiment Analysis</title>
+
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+   <link rel="stylesheet" href="{{url_for('static',filename='assets/fa-icon/css/font-awesome.min.css')}}">
+   <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
+
+</head>
+<body>
+    <div class="page">
+        <div class="sidebar" id="sidebar">
+           <div class="position-relative">
+              <div class="toggle-sidebar" id="toggle-sidebar" onclick="toggleSidebar()">
+                 <i class="fa fa-chevron-right" aria-hidden="true"></i>
+              </div>
+              <a class="side-item" href={{url_for('index')}}>Sentimen Analysis</a>
+              <a class="side-item" href={{url_for('word_clouds')}}>Word Clouds</a>
+              <a class="side-item" href={{url_for('word_data')}}>Depression Trends</a>
+              <a class="side-item active" href={{url_for('prediksi')}}>Prediksi</a>
+           </div>
+        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
+     </script>
+
+     <h1>Hasil Analisis Sentimen Twitter</h1>
+     <p>Input tweet: {{ tweet }}</p>
+     <p>Hasil prediksi: {{ prediction }}</p>
+
+</body>
+</html>

@@ -9,7 +9,7 @@ from sklearn.utils import resample
 app = Flask(__name__)
 
 # Membaca data dari file CSV
-data = pd.read_csv('./data/stemming_fix.csv')
+data = pd.read_csv('./static/data/stemming_fix.csv')
 
 # Memisahkan teks dan label
 tweets = data['stemming']
@@ -46,7 +46,7 @@ def index():
         tweet = request.form['tweet']
         input_vector = vectorizer.transform([tweet])
         prediction = model.predict(input_vector)[0]
-        return render_template({{url_for('prediksi')}}, tweet=tweet, prediction=prediction)
+        return render_template('result_flask.html', tweet=tweet, prediction=prediction)
     return render_template('index_flask.html')
 
 if __name__ == '__main__':

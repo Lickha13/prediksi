@@ -52,18 +52,20 @@
 
    <script>
       const data_image = {
-         img_positif: {{url_for('static', filename='assets/image/wordcloud_positif.png')}},
-         img_netral: {{url_for('static', filename='assets/image/wordcloud_netral.png')}},
-         img_negatif: {{url_for('static', filename='assets/image/wordcloud_negatir.png')}}
-      }
+        img_positif: "{{url_for('static', filename='assets/image/wordcloud_positif.png')}}",
+        img_netral: "{{url_for('static', filename='assets/image/wordcloud_netral.png')}}",
+        img_negatif: "{{url_for('static', filename='assets/image/wordcloud_negatif.png')}}"
+      };
+    
       document.getElementById('select-word').addEventListener("change", onChange);
-
+    
       function onChange(e) {
-         innerHtml('img-word', `
-            <img src="${data_image[e.target.value]}" alt="image word clouds">
-         `)
+        document.getElementById('img-word').innerHTML = `
+          <img src="${data_image[e.target.value]}" alt="image word clouds">
+        `;
       }
-   </script>
+    </script>
+    
 </body>
 
 </html>
